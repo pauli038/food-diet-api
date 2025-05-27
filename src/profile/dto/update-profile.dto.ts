@@ -2,6 +2,10 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateProfileDto {
   @ApiPropertyOptional()
+  email?: string;
+  @ApiPropertyOptional()
+  password?: string;
+  @ApiPropertyOptional()
   age?: number;
 
   @ApiPropertyOptional()
