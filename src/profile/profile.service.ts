@@ -27,21 +27,6 @@ async findByUserId(userId: number) {
   return this.profileModel.findOne({ where: { userId } });
 }
 
-
-  async getByEmail(email: string): Promise<Profile> {
-    const user = await this.userModel.findOne({
-      where: { email },
-      include: [Profile],
-    });
-
-    if (!user || !user.profile) {
-      throw new NotFoundException('Perfil no encontrado');
-    }
-
-    return user.profile;
-  }
-
-  
   async updateByUserId(userId: number, dto: UpdateProfileDto): Promise<Profile> {
     const profile = await this.profileModel.findOne({ where: { userId } });
 
