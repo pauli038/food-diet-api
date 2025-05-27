@@ -1,10 +1,22 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateProfileDto {
-  @ApiProperty() age: number;
-  @ApiProperty() height: number;
-  @ApiProperty() weight: number;
-  @ApiProperty() objective: string;
-  @ApiProperty({ type: [String] }) preferences: string[];
-  @ApiProperty({ type: [Object] }) conditions: { condition: string; notes: string }[];
+  @ApiPropertyOptional()
+  age?: number;
+
+  @ApiPropertyOptional()
+  height?: number;
+
+  @ApiPropertyOptional()
+  weight?: number;
+
+  @ApiPropertyOptional()
+  objective?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  preferences?: string[];
+
+  @ApiPropertyOptional({ type: [Object] })
+  conditions?: { condition: string; notes: string }[];
 }
+

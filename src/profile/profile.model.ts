@@ -11,12 +11,12 @@ export class Profile extends Model {
   preferences: string[]; 
 
   @Column(DataType.JSON)
-  conditions: { condition: string; notes: string }[]; 
+   declare conditions: { condition: string; notes: string }[]; 
 
   @ForeignKey(() => User)
   @Column
-  userId: number;
+  declare userId: number;
 
   @BelongsTo(() => User)
-  user: User;
+  declare user: User;
 }

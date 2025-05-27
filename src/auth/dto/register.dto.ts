@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail } from 'class-validator';
+import { ProfileInputDto } from './profile-input.dto';
 
 
 export class RegisterDto {
@@ -12,4 +13,8 @@ export class RegisterDto {
   @ApiProperty({ type: [Object] }) 
   conditions: { condition: string; notes: string }[];
   @ApiProperty({ type: [String] }) preferences: string[];
+
+  @ApiProperty({ type: ProfileInputDto })
+  profile: ProfileInputDto;
+
 }

@@ -24,7 +24,7 @@ async register(dto: RegisterDto) {
     email: dto.email,
     password: hashedPassword,
   });
-  console.log('hashedPassword:', hashedPassword);
+
 
 
   await this.profile.createProfile({

@@ -23,6 +23,10 @@ export class ProfileService {
     conditions: JSON.stringify(dto.conditions),
   });
 }
+async findByUserId(userId: number) {
+  return this.profileModel.findOne({ where: { userId } });
+}
+
 
   async getByEmail(email: string): Promise<Profile> {
     const user = await this.userModel.findOne({
@@ -37,26 +41,23 @@ export class ProfileService {
     return user.profile;
   }
 
-  async updateByEmail(email: string, dto: UpdateProfileDto): Promise<Profile> {
-    const user = await this.userModel.findOne({
-      where: { email },
-      include: [Profile],
-    });
+  
+  async updateByUserId(userId: number, dto: UpdateProfileDto): Promise<Profile> {
+    const profile = await this.profileModel.findOne({ where: { userId } });
 
-    if (!user || !user.profile) {
+    if (!profile) {
       throw new NotFoundException('Perfil no encontrado');
     }
 
-    const profile = user.profile;
+    
+    if (dto.preferences) {
+      dto.preferences = JSON.stringify(dto.preferences) as any;
+    }
 
-    profile.age = dto.age;
-    profile.height = dto.height;
-    profile.weight = dto.weight;
-    profile.objective = dto.objective;
-    preferences: dto.preferences;
-    conditions: dto.conditions;
+    if (dto.conditions) {
+      dto.conditions = JSON.stringify(dto.conditions) as any;
+    }
 
-    await profile.save();
-    return profile;
+    return profile.update(dto);
   }
 }
