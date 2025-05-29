@@ -14,7 +14,6 @@ export class RegisterDto {
   conditions: { condition: string; notes: string }[];
   @ApiProperty({ type: [String] }) preferences: string[];
 
-  @ApiProperty({ type: ProfileInputDto })
-  profile: ProfileInputDto;
+  
 
 }

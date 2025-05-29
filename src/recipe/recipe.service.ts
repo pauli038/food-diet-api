@@ -67,10 +67,10 @@ export class RecipeService {
   const objective = profile.objective || "ninguno";
   const preferences = Array.isArray(profile.preferences)
     ? (profile.preferences.length ? profile.preferences.join(", ") : "ninguna preferencia")
-    : (profile.preferences?.length ? profile.preferences : "ninguna preferencia");
+    : (typeof profile.preferences === 'string' && (profile.preferences as string).length ? profile.preferences : "ninguna preferencia");
   const conditions = Array.isArray(profile.conditions) && profile.conditions.length
     ? profile.conditions.map((c: any) => c.condition).join(", ")
-    : (typeof profile.conditions === 'string' && profile.conditions.length
+    : (typeof profile.conditions === 'string' && (profile.conditions as string).length
         ? profile.conditions
         : "ninguna condición");
 
