@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Put, Request } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
@@ -7,11 +7,12 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 @Controller('profiles')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
-
   
-  @Get('user/:id')
-  getProfileByUserId(@Param('id') id: string) {
-    return this.profileService.findByUserId(Number(id));
+  @Get('user/:userId')
+  @ApiParam({ name: 'userId', type: Number, description: 'ID del usuario' })
+  @ApiResponse({ status: 200, description: 'Perfil encontrado con datos del usuario asociado' })
+  async getByUserId(@Param('userId') userId: number) {
+    return this.profileService.findByUserId(userId);
   }
 
 

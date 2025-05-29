@@ -15,6 +15,7 @@ export class ProfileService {
   async createProfile(dto: CreateProfileDto): Promise<Profile> {
   return this.profileModel.create({
     userId: dto.userId,
+    email: dto.email,
     age: dto.age,
     height: dto.height,
     weight: dto.weight,
@@ -23,9 +24,7 @@ export class ProfileService {
     conditions: JSON.stringify(dto.conditions),
   });
 }
-async findByUserId(userId: number) {
-  return this.profileModel.findOne({ where: { userId } });
-}
+
 
   async updateByUserId(userId: number, dto: UpdateProfileDto): Promise<Profile> {
     const profile = await this.profileModel.findOne({ where: { userId } });
@@ -45,4 +44,11 @@ async findByUserId(userId: number) {
 
     return profile.update(dto);
   }
+  async findByUserId(userId: number) {
+  return this.profileModel.findOne({
+    where: { userId },
+    include: [{ model: User, attributes: ['email'] }],
+  });
+}
+
 }

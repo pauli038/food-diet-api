@@ -1,4 +1,5 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import { Column, Model, Table, DataType, BelongsTo, ForeignKey } from 'sequelize-typescript';
+import { User } from 'src/user/user.model';
 
 @Table
 export class Recipe extends Model {
@@ -13,4 +14,11 @@ export class Recipe extends Model {
 
   @Column(DataType.TEXT)
   steps: string; 
+  
+  @ForeignKey(() => User)
+  @Column({ type: DataType.INTEGER })
+  userId: number;
+  
+  @BelongsTo(() => User)
+  user: User;
 }

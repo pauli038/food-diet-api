@@ -1,70 +1,95 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Recipe } from './recipe.model';
-import { CreateRecipeDto } from './dto/create-recipe.dto';
+import { Profile } from '../profile/profile.model';
+import { User } from '../user/user.model';
+import { GeminiService } from 'src/gemini/gemini.service';
 import { buildRecipePrompt } from 'src/utils/prompt-builder';
-import axios from 'axios';
-import { Profile } from 'src/profile/profile.model';
 
 
 @Injectable()
 export class RecipeService {
-  Profile: any;
-  apiKey: any;
-  user: any;
   constructor(
-    @InjectModel(Recipe)
-    private recipeModel: typeof Recipe,
+    @InjectModel(Recipe) private recipeModel: typeof Recipe,
+    @InjectModel(Profile) private profileModel: typeof Profile,
+    @InjectModel(User) private userModel: typeof User,
+    private readonly geminiService: GeminiService,
   ) {}
 
-   async saveGeneratedRecipes(recipes: CreateRecipeDto[]) {
-    const savedRecipes: Recipe[] = [];
+  async generateFromUserId(userId: number) {
+    const profile = await this.profileModel.findOne({ where: { userId } });
 
-    for (const r of recipes) {
-      const recipe = await this.recipeModel.create({
-        name: r.name,
-        description: r.description,
-        ingredients: JSON.stringify(r.ingredients),
-        steps: JSON.stringify(r.steps),
+    if (!profile) {
+      throw new NotFoundException('Perfil no encontrado');
+    }
+
+    const prompt = this.buildRecipePrompt(profile);
+    const aiText = await this.geminiService.generateContent(prompt);
+     const cleaned = aiText
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    try {
+      const recipeData = JSON.parse(cleaned);
+      return await this.recipeModel.create({
+        title: recipeData.nombre || 'Receta generada',
+        content: JSON.stringify(recipeData),
+        userId,
       });
-
-      savedRecipes.push(recipe);
+    } catch (error) {
+      console.error('❌ Error al hacer JSON.parse:', error.message);
+      throw new BadRequestException('No se pudo parsear la receta generada por IA');
     }
-
-    return savedRecipes;
   }
+  
+ async findByUserId(userId: number) {
+  const recipes = await this.recipeModel.findAll({ where: { userId } });
 
- async generateRecipeFromGemini(email: string): Promise<Recipe> {
-  const user = await this.user.findOne({ where: { email }, include: [Profile] });
-
-  if (!user || !user.profile) {
-    throw new NotFoundException('Usuario o perfil no encontrado');
-  }
-
-  const prompt = buildRecipePrompt(user.profile);
-
-  const response = await axios.post(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`,
-    {
-      contents: [{ parts: [{ text: prompt }] }],
-    }
-  );
-
-  const text = response.data.candidates[0]?.content?.parts[0]?.text;
-  const parsed = JSON.parse(text);
-
-  return this.recipeModel.create({
-    name: parsed.name,
-    description: parsed.description,
-    ingredients: JSON.stringify(parsed.ingredients),
-    steps: JSON.stringify(parsed.steps),
-  });
+  return recipes.map(recipe => ({
+    id: recipe.id,
+    userId: recipe.userId,
+    name: recipe.name,
+    description: recipe.description,
+    ingredients: recipe.ingredients ? JSON.parse(recipe.ingredients) : [],
+    steps: recipe.steps ? JSON.parse(recipe.steps) : [],
+    createdAt: recipe.createdAt,
+    updatedAt: recipe.updatedAt,
+  }));
 }
 
 
-  async getAllRecipes(): Promise<Recipe[]> {
+  
+  private buildRecipePrompt(profile: Profile): string {
+      const age = profile.age ? profile.age : "no especificada";
+  const weight = profile.weight ? profile.weight : "no especificado";
+  const height = profile.height ? profile.height : "no especificada";
+  const objective = profile.objective || "ninguno";
+  const preferences = Array.isArray(profile.preferences)
+    ? (profile.preferences.length ? profile.preferences.join(", ") : "ninguna preferencia")
+    : (profile.preferences?.length ? profile.preferences : "ninguna preferencia");
+  const conditions = Array.isArray(profile.conditions) && profile.conditions.length
+    ? profile.conditions.map((c: any) => c.condition).join(", ")
+    : (typeof profile.conditions === 'string' && profile.conditions.length
+        ? profile.conditions
+        : "ninguna condición");
+
+  return `
+Genera una receta saludable considerando lo siguiente:
+- Edad: ${age}
+- Peso: ${weight}
+- Altura: ${height}
+- Objetivo: ${objective}
+- Preferencias alimenticias: ${preferences}
+- Condiciones médicas: ${conditions}
+
+La receta debe ser práctica, con ingredientes accesibles, indicar nombre, descripción, porciones, pasos e información nutricional.
+Devuélvela en formato JSON válido con las siguientes propiedades: nombre, descripcion, porciones, ingredientes[], instrucciones[], informacion_nutricional_aproximada_por_porcion.
+`;
+}
+
+
+  async findAll() {
     return this.recipeModel.findAll();
   }
-
-
 }
