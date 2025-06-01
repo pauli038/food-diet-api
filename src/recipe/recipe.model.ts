@@ -9,11 +9,11 @@ export class Recipe extends Model {
   @Column(DataType.TEXT)
   description: string;
 
-  @Column(DataType.TEXT)
-  ingredients: string; 
+  @Column(DataType.JSON)
+  ingredients: any[];
 
-  @Column(DataType.TEXT)
-  steps: string; 
+ @Column(DataType.JSON)
+ steps: any[];
   
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER })

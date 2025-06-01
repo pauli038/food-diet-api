@@ -1,6 +1,15 @@
 import { Profile } from '../profile/profile.model';
 
 export function buildRecipePrompt(profile: Profile): string {
+  // Parsear si vienen como string
+  const preferences = typeof profile.preferences === 'string'
+    ? JSON.parse(profile.preferences)
+    : profile.preferences;
+
+  const conditions = typeof profile.conditions === 'string'
+    ? JSON.parse(profile.conditions)
+    : profile.conditions;
+
   const base = `Genera una receta saludable en formato JSON con los siguientes campos:
 {
   "name": "Nombre de la receta",
@@ -12,15 +21,14 @@ export function buildRecipePrompt(profile: Profile): string {
   const objetivo = `Objetivo: ${profile.objective}`;
   const datos = `Edad: ${profile.age} años, Altura: ${profile.height} cm, Peso: ${profile.weight} kg.`;
 
-  const preferencias = Array.isArray(profile.preferences) && profile.preferences.length
-    ? `Preferencias: ${profile.preferences.join(', ')}.`
-    : '';
+  const preferenciasText = Array.isArray(preferences) && preferences.length
+    ? `Preferencias: ${preferences.join(', ')}.`
+    : 'Preferencias: ninguna.';
 
-  const condiciones = Array.isArray(profile.conditions) && profile.conditions.length
-    ? `Condiciones de salud:\n${profile.conditions
-        .map((c) => `- ${c.condition}: ${c.notes}`)
-        .join('\n')}`
-    : '';
+  const condicionesText = Array.isArray(conditions) && conditions.length
+    ? `Condiciones de salud:\n${conditions.map((c) => `- ${c.condition || c}`).join('\n')}`
+    : 'Condiciones médicas: ninguna.';
 
-  return `${base}\n\n${datos}\n${objetivo}\n${preferencias}\n${condiciones}\nLa receta debe ser sencilla y adecuada para este perfil.`;
+  return `${base}\n\n${datos}\n${objetivo}\n${preferenciasText}\n${condicionesText}\nLa receta debe ser sencilla y adecuada para este perfil.`;
 }
+
