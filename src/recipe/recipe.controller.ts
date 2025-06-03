@@ -1,11 +1,16 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { Recipe } from './recipe.model';
+import { AuthGuard } from '@nestjs/passport';
+import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { User } from 'src/auth/user.decorator';
 
 @ApiTags('Recipe')
 @Controller('recipes')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard('jwt'))
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
@@ -18,7 +23,7 @@ export class RecipeController {
   
 
   @Get('user/:userId')
-async getByUser(@Param('userId', ParseIntPipe) userId: number) {
+  async getByUser(@Param('userId', ParseIntPipe) userId: number) {
   const recipes = await this.recipeService.findByUserId(userId);
 
   return recipes.map((recipe) => ({
@@ -39,15 +44,29 @@ async getByUser(@Param('userId', ParseIntPipe) userId: number) {
     updatedAt: recipe.updatedAt,
   }));
 }
+@Get()
+async getAll(): Promise<Recipe[]> {
+  return this.recipeService.getAllRecipes();
+}
 
-  @Delete('user/:userId')
-  @ApiParam({ name: 'userId', description: 'ID del usuario', type: Number })  
-  async deleteByUser(@Param('userId', ParseIntPipe) userId: number) {
-    const result = await this.recipeService.deletebyUserId(userId);
-    if (!result) {
-      throw new NotFoundException('No se encontraron recetas para eliminar de este usuario');
-    }
-    return { message: 'Recetas eliminadas correctamente' };
+  @Patch(':id')
+  async updateRecipe(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateRecipeDto,
+    @Req() req: any, // Idealmente deberías tipar esto como RequestWithUser si tenés una interfaz
+  ) {
+    const userId = req.user.id;
+    return this.recipeService.updateRecipeById(id, userId, dto);
   }
+
+
+  @Delete(':id')
+  async deleteRecipe(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: any,
+  ) {
+    return this.recipeService.deleteRecipeById(id, 2);
+  }
+  
 
 }

@@ -1,24 +1,22 @@
-import { Column, Model, Table, DataType, BelongsTo, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey } from 'sequelize-typescript';
 import { User } from 'src/user/user.model';
 
-@Table
+@Table({ timestamps: true })
 export class Recipe extends Model {
-  @Column(DataType.STRING)
+  
+  @Column({ type: DataType.STRING })
   name: string;
 
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.STRING })
   description: string;
 
-  @Column(DataType.JSON)
-  ingredients: any[];
+  @Column({ type: DataType.TEXT })
+  ingredients: string;
 
- @Column(DataType.JSON)
- steps: any[];
-  
+  @Column({ type: DataType.TEXT })
+  steps: string;
+
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER })
   userId: number;
-  
-  @BelongsTo(() => User)
-  user: User;
 }

@@ -10,6 +10,7 @@ import { RecipeModule } from './recipe/recipe.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { RecipeForeignModule } from './foreign-recipe/recipe-foreign.module';
 
 @Module({
   
@@ -25,12 +26,14 @@ import { AuthModule } from './auth/auth.module';
        models: [User, Profile, Recipe],
        autoLoadModels: true,
        synchronize: true,
-       logging: false,
+       logging: console.log,
+
     }),
     UserModule,
     ProfileModule,
     RecipeModule,
-    AuthModule
+    AuthModule,
+    RecipeForeignModule,
   ],
   controllers: [AppController],
   providers: [AppService],

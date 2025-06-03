@@ -1,6 +1,6 @@
-import { Profile } from '../profile/profile.model';
+import { Profile } from "src/profile/profile.model";
 
-export function buildRecipePrompt(profile: Profile): string {
+export function buildForeignRecipePrompt(profile: Profile): string {
   const preferences = typeof profile.preferences === 'string'
     ? JSON.parse(profile.preferences)
     : profile.preferences;
@@ -11,13 +11,16 @@ export function buildRecipePrompt(profile: Profile): string {
 
   const fecha = new Date().toLocaleDateString('es-ES');
 
-  const base = `Quiero que generes una receta saludable y original en formato JSON válido, sin explicaciones ni justificaciones. Cada vez que generes una receta, intenta variar el tipo de comida, nivel de dificultad, ingredientes y estilo culinario (puede ser desayuno, cena, snack, internacional, vegetal, rápida, etc.).
+  return `Quiero que generes una receta saludable y original en formato JSON válido, sin explicaciones ni justificaciones. Cada vez que generes una receta, intenta variar el tipo de comida, nivel de dificultad, ingredientes y estilo culinario (puede ser desayuno, cena, snack, internacional, vegetal, rápida, etc.). La receta debe estar basada exclusivamente en la gastronomía de alguno de estos países: Tailandia, Japón, México, Francia o Italia.
 
 Usa la siguiente estructura **estrictamente**:
 
 {
   "name": "Nombre de la receta",
+  "country": "País de origen(Tailandia, Japón, México, Francia o Italia)",
+  "category": "Categoría de la receta (desayuno, cena, snack, etc.)",
   "description": "Descripción breve de la receta",
+  "imageUrl": "URL de una imagen ilustrativa",
   "ingredients": ["Ingrediente 1", "Ingrediente 2", "..."],
   "steps": ["Paso 1", "Paso 2", "..."]
 }
@@ -35,9 +38,5 @@ Usa la siguiente estructura **estrictamente**:
 
 ⚠️ IMPORTANTE:
 - Responde **solo** con un objeto JSON válido.
-- No incluyas explicaciones, comentarios, ni texto adicional.
-`;
-
-  return base;
+- No incluyas explicaciones, comentarios, ni texto adicional.`;
 }
-

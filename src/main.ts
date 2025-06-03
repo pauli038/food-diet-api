@@ -9,7 +9,16 @@ const config = new DocumentBuilder()
   .setTitle('Food Diet API')
   .setDescription('Documentación de la API')
   .setVersion('1.0')
-  .addBearerAuth() 
+   .addBearerAuth(
+    {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      name: 'Authorization',
+      in: 'header',
+    },
+    'access-token', 
+  )
   .build();
 
   const document = SwaggerModule.createDocument(app, config);

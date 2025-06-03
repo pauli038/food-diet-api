@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail } from 'class-validator';
-import { ProfileInputDto } from './profile-input.dto';
+
 
 
 export class RegisterDto {
