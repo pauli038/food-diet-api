@@ -2,11 +2,13 @@ import { Controller, Post, Get, Param, Body, Patch, Delete, ParseIntPipe, UseGua
 import { RecipeForeignService } from './recipe-foreign.service';
 import { UpdateRecipeForeignDto } from './dto/update-recipe-foreign.dto';
 import { CreateRecipeForeignDto } from './dto/create-recipe.dto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('foreign-recipes')
 @Controller('foreign-recipes')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard('jwt'))
 export class RecipeForeignController {
   constructor(private readonly service: RecipeForeignService) {}
  

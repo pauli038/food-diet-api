@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { RegisterDto } from "./dto/register.dto";
 import { User } from "src/user/user.model";
 import { ProfileService } from "src/profile/profile.service";
@@ -14,8 +14,7 @@ export class AuthService {
 constructor(
  @InjectModel(User) private userModel: typeof User,
   private readonly profile: ProfileService, 
-  private readonly jwtService: JwtService,
-) {}
+  private readonly jwtService: JwtService) {}
 
 async register(dto: RegisterDto) {
   const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -58,13 +57,26 @@ async login(dto: LoginDto) {
 }
 
 async recoverPassword(dto: RecoverPasswordDto) {
-  const user = await this.userModel.findOne({ where: { email: dto.email } });
+  const { email, newPassword, confirmPassword } = dto;
+
+  if (newPassword !== confirmPassword) {
+    throw new BadRequestException('Las contraseñas no coinciden');
+  }
+
+  const user = await this.userModel.findOne({ where: { email } });
 
   if (!user) {
     throw new NotFoundException('Usuario no encontrado');
   }
 
-  user.password = dto.newPassword;
+  const isSamePassword = await bcrypt.compare(newPassword, user.password);
+  if (isSamePassword) {
+    throw new BadRequestException('La nueva contraseña no puede ser igual a la anterior');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+
   await user.save();
 
   return { message: 'Contraseña actualizada correctamente' };

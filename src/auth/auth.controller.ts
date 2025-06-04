@@ -1,5 +1,5 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { Body, Controller, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -24,9 +24,10 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  @Post('recover-password')
+  @Patch('recover-password')
+  @ApiOperation({ summary: 'Recuperar contraseña del usuario por correo electrónico' })
   @ApiBody({ type: RecoverPasswordDto })
   async recoverPassword(@Body() dto: RecoverPasswordDto) {
     return this.authService.recoverPassword(dto);
-    }
+  }
 }  

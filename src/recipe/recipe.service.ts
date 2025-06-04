@@ -12,7 +12,7 @@ import { GeminiService } from 'src/gemini/gemini.service';
 import { buildRecipePrompt } from 'src/utils/prompt-builder';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { AuthService } from 'src/auth/auth.service';
+
 
 
 @Injectable()
