@@ -70,4 +70,32 @@ async recoverPassword(dto: RecoverPasswordDto) {
   return { message: 'Contraseña actualizada correctamente' };
 }
 
+ extractTokenFromRawHeaders(rawHeaders: string[]): string | null {
+    for (let i = 0; i < rawHeaders.length; i += 2) {
+      if (rawHeaders[i].toLowerCase() === 'authorization') {
+        const tokenHeader = rawHeaders[i + 1];
+        if (tokenHeader && tokenHeader.startsWith('Bearer ')) {
+          return tokenHeader.replace('Bearer ', '');
+        }
+      }
+    }
+    return null;
+  }
+
+  async decodeToken(rawHeaders: string[]) {
+    const token = this.extractTokenFromRawHeaders(rawHeaders);
+
+    if (!token) {
+      throw new UnauthorizedException('No token found in raw headers');
+    }
+
+    try {
+      const decoded = await this.jwtService.decode(token);
+ 
+      return decoded;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
 }

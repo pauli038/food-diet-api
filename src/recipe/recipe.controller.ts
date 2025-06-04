@@ -14,7 +14,14 @@ import { User } from 'src/auth/user.decorator';
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
- 
+ @Post()
+async createRecipe(
+  @Body() dto: CreateRecipeDto,
+  @User() user: any,
+  ) {
+  return this.recipeService.createRecipeManually(user.id, dto);
+  }
+
   @Post('generate/user/:userId')
   @ApiParam({ name: 'userId', description: 'ID del usuario', type: Number })
   async generateForUser(@Param('userId') userId: number) {
@@ -53,20 +60,23 @@ async getAll(): Promise<Recipe[]> {
   async updateRecipe(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRecipeDto,
-    @Req() req: any, // Idealmente deberías tipar esto como RequestWithUser si tenés una interfaz
+    @User() user: any,
   ) {
-    const userId = req.user.id;
-    return this.recipeService.updateRecipeById(id, userId, dto);
+    
+    console.log(user);
+    
+    return this.recipeService.updateRecipeById(id, user.id, dto);
   }
-
 
   @Delete(':id')
   async deleteRecipe(
-    @Param('id', ParseIntPipe) id: number,
-    @User() user: any,
+  @Param('id', ParseIntPipe) id: number,
+  @User() user: any,
   ) {
-    return this.recipeService.deleteRecipeById(id, 2);
+  return this.recipeService.deleteRecipeById(id, user.id);
   }
+
+
   
 
 }

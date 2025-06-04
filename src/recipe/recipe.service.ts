@@ -12,6 +12,7 @@ import { GeminiService } from 'src/gemini/gemini.service';
 import { buildRecipePrompt } from 'src/utils/prompt-builder';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 
 @Injectable()
@@ -20,7 +21,7 @@ export class RecipeService {
     @InjectModel(Recipe) private recipeModel: typeof Recipe,
     @InjectModel(Profile) private profileModel: typeof Profile,
     @InjectModel(User) private userModel: typeof User,
-    private readonly geminiService: GeminiService,
+    private readonly geminiService: GeminiService
   ) {}
 
    private safeJsonParse(value: any): any[] {
@@ -31,6 +32,29 @@ export class RecipeService {
       return [];
     }
   }
+  async createRecipeManually(
+  userId: number,
+  dto: CreateRecipeDto,
+): Promise<{ message: string; recipeId: number }> {
+  try {
+    const recipe = await this.recipeModel.create({
+      userId,
+      name: dto.name,
+      description: dto.description,
+      ingredients: JSON.stringify(dto.ingredients),
+      steps: JSON.stringify(dto.steps),
+    });
+
+    return {
+      message: 'Receta creada correctamente',
+      recipeId: recipe.id,
+    };
+  } catch (error) {
+    console.error('Error al crear la receta:', error);
+    throw new InternalServerErrorException('Error al crear la receta');
+  }
+}
+
   async generateFromUserId(userId: number) {
   const profile = await this.profileModel.findOne({ where: { userId } });
 
@@ -150,20 +174,25 @@ async updateRecipeById(
   return { message: 'Receta actualizada correctamente' };
 }
 
-async deleteRecipeById(
-  recipeId: number,
-  userId: number,
-): Promise<{ message: string }> {
+async deleteRecipeById(recipeId: number, userId: number): Promise<{ message: string }> {
   const recipe = await this.recipeModel.findOne({ where: { id: recipeId, userId } });
 
   if (!recipe) {
     throw new NotFoundException('Receta no encontrada o no autorizada');
   }
 
-  await recipe.destroy();
+  try {
+    await recipe.destroy(); // También podrías usar `await this.recipeModel.destroy({ where: { id: recipeId, userId } })`
+  } catch (error) {
+    console.error('Error al eliminar la receta:', error);
+    throw new InternalServerErrorException('Error al eliminar la receta');
+  }
 
   return { message: 'Receta eliminada correctamente' };
 }
+
+
+
 
    
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { RecipeForeign } from './recipe-foreign.model';
 import { UpdateRecipeForeignDto } from './dto/update-recipe-foreign.dto';
@@ -18,11 +18,8 @@ export class RecipeForeignService {
     private geminiService: GeminiService
   ) {}
 
- async create(dto: CreateRecipeForeignDto) {
-  const plainData = { ...dto };
-  return this.recipeModel.create(plainData);
-}
-
+  
+ 
   async generateFromUserId(userId: number) {
     const profile = await this.profileModel.findOne({ where: { userId } });
     if (!profile) throw new NotFoundException('Perfil no encontrado');
@@ -69,27 +66,49 @@ export class RecipeForeignService {
     return recipe;
   }
 
-  async findAll() {
-    return this.recipeModel.findAll();
-  }
-
   async findByUserId(userId: number) {
     return this.recipeModel.findAll({ where: { userId } });
+  }
+   async findAll() {
+    return this.recipeModel.findAll();
   }
 
   async findById(id: number) {
     const recipe = await this.recipeModel.findByPk(id);
-    if (!recipe) throw new NotFoundException('Receta no encontrada');
+    if (!recipe) {
+      throw new NotFoundException('Receta extranjera no encontrada');
+    }
     return recipe;
+  }
+
+  async create(dto: CreateRecipeForeignDto) {
+    if (!dto || Object.keys(dto).length === 0) {
+      throw new BadRequestException('Datos inválidos');
+    }
+    return this.recipeModel.create({
+      name: dto.name,
+      description: dto.description,
+      ingredients: JSON.stringify(dto.ingredients),
+      steps: JSON.stringify(dto.steps),
+      country: dto.country,
+      imageUrl: dto.imageUrl,
+      category: dto.category,
+      originType: dto.originType,
+      userId: dto.userId,
+    });
   }
 
   async update(id: number, dto: UpdateRecipeForeignDto) {
     const recipe = await this.findById(id);
+    if (!dto || Object.keys(dto).length === 0) {
+      throw new BadRequestException('No se enviaron campos para actualizar');
+    }
     return recipe.update(dto);
   }
 
   async delete(id: number) {
     const recipe = await this.findById(id);
-    return recipe.destroy();
+    await recipe.destroy();
+    return { message: 'Receta eliminada correctamente' };
   }
 }
