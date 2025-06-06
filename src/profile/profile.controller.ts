@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -19,7 +19,7 @@ export class ProfileController {
   }
 
 
-  @Put('user/:id')
+  @Patch('user/:id')
   @ApiBody({ type: UpdateProfileDto })
   updateProfileByUserId(
     @Param('id') id: string,

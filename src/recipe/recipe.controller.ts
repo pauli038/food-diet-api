@@ -37,6 +37,7 @@ async createRecipe(
     id: recipe.id,
     name: recipe.name,
     description: recipe.description,
+    category: recipe.category,
     ingredients: typeof recipe.ingredients === 'string'
       ? JSON.parse(recipe.ingredients)
       : Array.isArray(recipe.ingredients)
@@ -76,7 +77,32 @@ async getAll(): Promise<Recipe[]> {
   return this.recipeService.deleteRecipeById(id, user.id);
   }
 
+@Get('category/:category')
+async getByCategory(@Param('category') category: string) {
+  const allowedCategories = ['almuerzo', 'cena', 'merienda'];
 
-  
+  if (!allowedCategories.includes(category.toLowerCase())) {
+    throw new BadRequestException('Categoría no válida.');
+  }
+
+  const recipes = await this.recipeService.findByCategory(category);
+
+  return recipes.map((recipe) => ({
+    id: recipe.id,
+    name: recipe.name,
+    description: recipe.description,
+    category: recipe.category,
+    ingredients: typeof recipe.ingredients === 'string' ? JSON.parse(recipe.ingredients) : [],
+    steps: typeof recipe.steps === 'string' ? JSON.parse(recipe.steps) : [],
+    createdAt: recipe.createdAt,
+    updatedAt: recipe.updatedAt,
+  }));
+}
 
 }
+
+  
+  
+  
+
+

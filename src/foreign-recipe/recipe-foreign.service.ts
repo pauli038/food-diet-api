@@ -18,7 +18,14 @@ export class RecipeForeignService {
     private geminiService: GeminiService
   ) {}
 
-  
+   private safeJsonParse(value: any): any[] {
+    if (!value) return [];
+    try {
+      return JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
  
   async generateFromUserId(userId: number) {
     const profile = await this.profileModel.findOne({ where: { userId } });
@@ -65,10 +72,24 @@ export class RecipeForeignService {
 
     return recipe;
   }
+   
+   async findByUserId(userId: number): Promise<RecipeForeign[]> {
+      const recipes = await this.recipeModel.findAll({
+        where: { userId },
+        order: [['createdAt', 'DESC']],
+      });
+  
+      return recipes.map((recipe) => {
+        const data = recipe.toJSON();
+        return {
+          ...data,
+          ingredients: this.safeJsonParse(data.ingredients),
+          steps: this.safeJsonParse(data.steps),
+        };
+      });
+    }
+  
 
-  async findByUserId(userId: number) {
-    return this.recipeModel.findAll({ where: { userId } });
-  }
    async findAll() {
     return this.recipeModel.findAll();
   }
@@ -81,22 +102,29 @@ export class RecipeForeignService {
     return recipe;
   }
 
-  async create(dto: CreateRecipeForeignDto) {
-    if (!dto || Object.keys(dto).length === 0) {
-      throw new BadRequestException('Datos inválidos');
-    }
-    return this.recipeModel.create({
-      name: dto.name,
-      description: dto.description,
-      ingredients: JSON.stringify(dto.ingredients),
-      steps: JSON.stringify(dto.steps),
-      country: dto.country,
-      imageUrl: dto.imageUrl,
-      category: dto.category,
-      originType: dto.originType,
-      userId: dto.userId,
-    });
-  }
+  async createRecipeManually(
+   userId: number,
+   dto: CreateRecipeForeignDto,
+ ): Promise<{ message: string; recipeId: number }> {
+   try {
+     const recipe = await this.recipeModel.create({
+       userId,
+       name: dto.name,
+       description: dto.description,
+       ingredients: JSON.stringify(dto.ingredients),
+       steps: JSON.stringify(dto.steps),
+     });
+ 
+     return {
+       message: 'Receta creada correctamente',
+       recipeId: recipe.id,
+     };
+   } catch (error) {
+     console.error('Error al crear la receta:', error);
+     throw new InternalServerErrorException('Error al crear la receta');
+   }
+ }
+ 
 
   async update(id: number, dto: UpdateRecipeForeignDto) {
     const recipe = await this.findById(id);

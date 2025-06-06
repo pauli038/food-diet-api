@@ -43,6 +43,7 @@ export class RecipeService {
       description: dto.description,
       ingredients: JSON.stringify(dto.ingredients),
       steps: JSON.stringify(dto.steps),
+      category: dto.category || 'General', // Asignar una categoría por defecto si no se proporciona
     });
 
     return {
@@ -93,7 +94,8 @@ export class RecipeService {
     !recipeData.name ||
     !recipeData.description ||
     !Array.isArray(recipeData.ingredients) ||
-    !Array.isArray(recipeData.steps)
+    !Array.isArray(recipeData.steps)||
+    !recipeData.category
   ) {
     console.error('📛 Datos inválidos:', recipeData);
     throw new BadRequestException(
@@ -106,6 +108,7 @@ export class RecipeService {
     description: String(recipeData.description),
     ingredients: JSON.stringify(recipeData.ingredients),
     steps: JSON.stringify(recipeData.steps),
+   category: recipeData.category,
     userId,
   });
 
@@ -190,9 +193,21 @@ async deleteRecipeById(recipeId: number, userId: number): Promise<{ message: str
 
   return { message: 'Receta eliminada correctamente' };
 }
-
-
-
+async findByCategory(category: string) {
+  return this.recipeModel.findAll({
+    where: { category },
+    attributes: [
+      'id',
+      'name',
+      'description',
+      'category',
+      'ingredients',
+      'steps',
+      'createdAt',
+      'updatedAt',
+    ],
+  });
+}
 
    
 }

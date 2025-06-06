@@ -18,7 +18,7 @@ Usa la siguiente estructura **estrictamente**:
 {
   "name": "Nombre de la receta",
   "country": "País de origen(Tailandia, Japón, México, Francia o Italia)",
-  "category": "Categoría de la receta (desayuno, cena, snack, etc.)",
+  "category": "Categoría de la receta (desayuno, cena, almuerzo, merienda)",
   "description": "Descripción breve de la receta",
   "imageUrl": "URL de una imagen ilustrativa",
   "ingredients": ["Ingrediente 1", "Ingrediente 2", "..."],

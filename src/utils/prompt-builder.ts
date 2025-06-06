@@ -19,6 +19,7 @@ Usa la siguiente estructura **estrictamente**:
   "name": "Nombre de la receta",
   "description": "Descripción breve de la receta",
   "ingredients": ["Ingrediente 1", "Ingrediente 2", "..."],
+  "category": "Categoría de la receta (desayuno, cena, almuerzo, merienda)",
   "steps": ["Paso 1", "Paso 2", "..."]
 }
 

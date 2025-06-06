@@ -21,4 +21,7 @@ export class CreateRecipeDto {
   @IsArray()
   @IsNotEmpty()
   steps: string[];
+
+  @ApiProperty({ example: 'Ensaladas', required: false })
+  category?: string;
 }

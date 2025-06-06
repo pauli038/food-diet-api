@@ -26,4 +26,8 @@ export class RecipeForeign extends Model {
 
   @Column({ type: DataType.STRING })
   originType: string; 
+  
+  @Column({ type: DataType.INTEGER })
+   userId: number;
+
 }

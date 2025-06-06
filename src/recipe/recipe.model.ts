@@ -15,6 +15,9 @@ export class Recipe extends Model {
 
   @Column({ type: DataType.TEXT })
   steps: string;
+  
+  @Column({ type: DataType.STRING })
+  category: string; 
 
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER })

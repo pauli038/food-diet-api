@@ -4,6 +4,8 @@ import { UpdateRecipeForeignDto } from './dto/update-recipe-foreign.dto';
 import { CreateRecipeForeignDto } from './dto/create-recipe.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/auth/user.decorator';
+
 
 @ApiTags('foreign-recipes')
 @Controller('foreign-recipes')
@@ -27,11 +29,33 @@ export class RecipeForeignController {
 
 
   @Get('user/:userId')
-  @ApiOperation({ summary: 'Obtener recetas por ID de usuario' })
-  getByUser(@Param('userId', ParseIntPipe) userId: number) {
-    return this.service.findByUserId(userId);
-  }
-  
+  async getByUser(@Param('userId', ParseIntPipe) userId: number) {
+  const recipes = await this.service.findByUserId(userId);
+
+  return recipes.map((recipe) => ({
+    id: recipe.id,
+    name: recipe.name,
+    country: recipe.country,
+    description: recipe.description,
+    imageUrl: recipe.imageUrl,
+    category: recipe.category,
+    originType: recipe.originType,
+    ingredients: typeof recipe.ingredients === 'string'
+      ? JSON.parse(recipe.ingredients)
+      : Array.isArray(recipe.ingredients)
+        ? recipe.ingredients
+        : [],
+    steps: typeof recipe.steps === 'string'
+      ? JSON.parse(recipe.steps)
+      : Array.isArray(recipe.steps)
+        ? recipe.steps
+        : [],
+    userId: recipe.userId,
+    createdAt: recipe.createdAt,
+    updatedAt: recipe.updatedAt,
+  }));
+}
+
  @Get()
   getAll() {
     return this.service.findAll();
@@ -43,10 +67,12 @@ export class RecipeForeignController {
   }
 
   @Post()
-  create(@Body() dto: CreateRecipeForeignDto) {
-    return this.service.create(dto);
-  }
-
+ async createRecipe(
+   @Body() dto: CreateRecipeForeignDto,
+   @User() user: any,
+   ) {
+   return this.service.createRecipeManually(user.id, dto);
+   }
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
