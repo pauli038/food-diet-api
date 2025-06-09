@@ -14,7 +14,7 @@ import { ProfileModule } from 'src/profile/profile.module';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secreto',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '24h' },
     }),
     SequelizeModule.forFeature([User, Profile]),
      ProfileModule, 

@@ -24,4 +24,7 @@ export class CreateRecipeDto {
 
   @ApiProperty({ example: 'Ensaladas', required: false })
   category?: string;
+
+  @ApiProperty()
+  userId:number
 }

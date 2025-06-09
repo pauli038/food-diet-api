@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
@@ -16,10 +16,9 @@ export class RecipeController {
 
  @Post()
   async createRecipe(
-  @Body() dto: CreateRecipeDto,
-  @User() user: any,
+  @Body() dto: CreateRecipeDto
   ) {
-  return this.recipeService.createRecipeManually(user.id, dto);
+  return this.recipeService.createRecipeManually(dto);
   }
 
   @Post('generate/user/:userId/:category')
@@ -86,9 +85,9 @@ async getAll(): Promise<Recipe[]> {
   return this.recipeService.deleteRecipeById(id, user.id);
   }
 
-@Get('category/:category')
-async getByCategory(@Param('category') category: string) {
-  const recipes = await this.recipeService.findByCategory(category.toLowerCase());
+@Get('category/:userId/:category')
+async getByCategory(@Param('category') category: string,  @Param('userId') userId: number,) {
+  const recipes = await this.recipeService.findByCategory(category.toLowerCase(), userId);
   return recipes; 
 }
 
