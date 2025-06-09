@@ -1,6 +1,6 @@
 import { Profile } from '../profile/profile.model';
 
-export function buildRecipePrompt(profile: Profile): string {
+export function buildRecipePrompt(profile: Profile,category: string): string {
   const preferences = typeof profile.preferences === 'string'
     ? JSON.parse(profile.preferences)
     : profile.preferences;
@@ -10,8 +10,11 @@ export function buildRecipePrompt(profile: Profile): string {
     : profile.conditions;
 
   const fecha = new Date().toLocaleDateString('es-ES');
+  const allowedCategories = ['desayuno', 'almuerzo', 'cena', 'merienda'];
 
-  const base = `Quiero que generes una receta saludable y original en formato JSON válido, sin explicaciones ni justificaciones. Cada vez que generes una receta, intenta variar el tipo de comida, nivel de dificultad, ingredientes y estilo culinario (puede ser desayuno, cena, snack, internacional, vegetal, rápida, etc.).
+  const base = `Quiero que generes una receta saludable y original en formato JSON válido, sin explicaciones ni justificaciones. 
+Debes usar la categoría de comida proporcionada: **${category}**.
+
 
 Usa la siguiente estructura **estrictamente**:
 
@@ -19,7 +22,7 @@ Usa la siguiente estructura **estrictamente**:
   "name": "Nombre de la receta",
   "description": "Descripción breve de la receta",
   "ingredients": ["Ingrediente 1", "Ingrediente 2", "..."],
-  "category": "Categoría de la receta (desayuno, cena, almuerzo, merienda)",
+  "category": Una categoría de comida seleccionada de entre ${allowedCategories.join(', ')},
   "steps": ["Paso 1", "Paso 2", "..."]
 }
 

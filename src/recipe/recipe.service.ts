@@ -56,14 +56,14 @@ export class RecipeService {
   }
 }
 
-  async generateFromUserId(userId: number) {
+  async generateFromUserId(userId: number,_category: string) {
   const profile = await this.profileModel.findOne({ where: { userId } });
 
   if (!profile) {
     throw new NotFoundException('Perfil no encontrado');
   }
 
-  const prompt = buildRecipePrompt(profile);
+  const prompt = buildRecipePrompt(profile,_category);
   const aiText = await this.geminiService.generateContent(prompt);
 
 
@@ -195,19 +195,10 @@ async deleteRecipeById(recipeId: number, userId: number): Promise<{ message: str
 }
 async findByCategory(category: string) {
   return this.recipeModel.findAll({
-    where: { category },
-    attributes: [
-      'id',
-      'name',
-      'description',
-      'category',
-      'ingredients',
-      'steps',
-      'createdAt',
-      'updatedAt',
-    ],
+    where: { category }
   });
 }
+
 
    
 }

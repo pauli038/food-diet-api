@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Patch, Delete, ParseIntPipe, UseGuards, BadRequestException } from '@nestjs/common';
 import { RecipeForeignService } from './recipe-foreign.service';
 import { UpdateRecipeForeignDto } from './dto/update-recipe-foreign.dto';
 import { CreateRecipeForeignDto } from './dto/create-recipe.dto';
@@ -85,4 +85,28 @@ export class RecipeForeignController {
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.service.delete(id);
   }
+  @Get('country/:country')
+  async getByCountry(@Param('country') country: string) {
+  
+  const allowedCountries = ['Tailandia', 'Japón', 'México', 'Francia', 'Italia'];
+
+   
+  const normalizeText = (text: string) =>
+    text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const normalizedParam = normalizeText(country);
+
+  const matchedCountry = allowedCountries.find(
+    (c) => normalizeText(c) === normalizedParam,
+  );
+
+  if (!matchedCountry) {
+    throw new BadRequestException(
+      'País no válido. Usa Tailandia, Japón, México, Francia o Italia.',
+    );
+  }
+
+  return this.service.findByCountry(matchedCountry); 
+}
+
 }
