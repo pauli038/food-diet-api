@@ -15,18 +15,27 @@ export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
  @Post()
-async createRecipe(
+  async createRecipe(
   @Body() dto: CreateRecipeDto,
   @User() user: any,
   ) {
   return this.recipeService.createRecipeManually(user.id, dto);
   }
 
-  @Post('generate/user/:userId')
-  @ApiParam({ name: 'userId', description: 'ID del usuario', type: Number })
-  async generateForUser(@Param('userId') userId: number) {
-    return this.recipeService.generateFromUserId(userId);
-  }
+  @Post('generate/user/:userId/:category')
+@ApiParam({ name: 'userId', description: 'ID del usuario', type: Number })
+@ApiParam({ 
+  name: 'category', 
+  description: 'Categoría de la receta (desayuno, almuerzo, cena, merienda)', 
+  enum: ['desayuno', 'almuerzo', 'cena', 'merienda'] 
+})
+async generateForUser(
+  @Param('userId') userId: number,
+  @Param('category') category: 'desayuno' | 'almuerzo' | 'cena' | 'merienda'
+) {
+  return this.recipeService.generateFromUserId(userId, category);
+}
+
   
 
   @Get('user/:userId')
@@ -79,25 +88,10 @@ async getAll(): Promise<Recipe[]> {
 
 @Get('category/:category')
 async getByCategory(@Param('category') category: string) {
-  const allowedCategories = ['almuerzo', 'cena', 'merienda'];
-
-  if (!allowedCategories.includes(category.toLowerCase())) {
-    throw new BadRequestException('Categoría no válida.');
-  }
-
-  const recipes = await this.recipeService.findByCategory(category);
-
-  return recipes.map((recipe) => ({
-    id: recipe.id,
-    name: recipe.name,
-    description: recipe.description,
-    category: recipe.category,
-    ingredients: typeof recipe.ingredients === 'string' ? JSON.parse(recipe.ingredients) : [],
-    steps: typeof recipe.steps === 'string' ? JSON.parse(recipe.steps) : [],
-    createdAt: recipe.createdAt,
-    updatedAt: recipe.updatedAt,
-  }));
+  const recipes = await this.recipeService.findByCategory(category.toLowerCase());
+  return recipes; 
 }
+
 
 }
 

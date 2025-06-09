@@ -139,4 +139,10 @@ export class RecipeForeignService {
     await recipe.destroy();
     return { message: 'Receta eliminada correctamente' };
   }
+  async findByCountry(country: string) {
+  return this.recipeModel.findAll({
+    where: { country },
+  });
+}
+
 }
