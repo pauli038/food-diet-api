@@ -27,11 +27,11 @@ export class RecipeForeignService {
     }
   }
  
-  async generateFromUserId(userId: number) {
+  async generateFromCountry(userId: number, country:string) {
     const profile = await this.profileModel.findOne({ where: { userId } });
     if (!profile) throw new NotFoundException('Perfil no encontrado');
 
-    const prompt = buildForeignRecipePrompt(profile);
+    const prompt = buildForeignRecipePrompt(profile, country);
     const aiText = await this.geminiService.generateContent(prompt);
 
     const start = aiText.indexOf('{');
@@ -59,7 +59,7 @@ export class RecipeForeignService {
       throw new BadRequestException('La receta generada no contiene los campos requeridos.');
     }
 
-    const recipe = await this.recipeModel.create({
+    /*const recipe = await this.recipeModel.create({
       name: recipeData.name,
       description: String(recipeData.description),
       ingredients: recipeData.ingredients,
@@ -68,9 +68,9 @@ export class RecipeForeignService {
       imageUrl: recipeData.imageUrl || '',
       category: recipeData.category || 'sin categoría',
       originType: 'generado',
-    });
+    });*/
 
-    return recipe;
+    return recipeData;
   }
    
    async findByUserId(userId: number): Promise<RecipeForeign[]> {

@@ -15,16 +15,11 @@ export class RecipeForeignController {
   constructor(private readonly service: RecipeForeignService) {}
  
   
-  @Post('generate/:userId')
-  @ApiOperation({ summary: 'Generar una receta extranjera con Gemini a partir del perfil del usuario' })
-  @ApiParam({ name: 'userId', type: Number, description: 'ID del usuario con perfil configurado' })
+  @Post('generate/:country/:userId')
+  @ApiParam({ name: 'country', type: String, description: 'Pais de la receta' })
   @ApiResponse({ status: 201, description: 'Receta generada con éxito' })
-  async generateFromUser(@Param('userId', ParseIntPipe) userId: number) {
-    const recipe = await this.service.generateFromUserId(userId);
-    return {
-      message: 'Receta generada correctamente con Gemini',
-      data: recipe,
-    };
+  async generateFromCountry(@Param('country') country: string,@Param('userId', ParseIntPipe) userId: number) {
+    return  await this.service.generateFromCountry(userId,country);
   }
 
 
