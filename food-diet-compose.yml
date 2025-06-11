@@ -1,0 +1,26 @@
+services:
+  food-diet:
+    container_name: food-diet-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DB_HOST: mysql
+        DB_PORT: '3306'
+        DB_USERNAME: sql user
+        DB_PASSWORD: sql password
+        DB_NAME: db name
+        DB_DIALECT: mysql
+        GEMINI_API_KEY: api key
+    expose:
+      - '3000'
+    environment:
+      - VIRTUAL_HOST=food-diet.dianprojects.online
+      - LETSENCRYPT_HOST=food-diet.dianprojects.online
+      - LETSENCRYPT_EMAIL=dian7875.a@gmail.com
+    networks:
+      - proxy_network
+
+networks:
+  proxy_network:
+    external: true
