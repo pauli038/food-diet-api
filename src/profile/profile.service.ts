@@ -45,10 +45,28 @@ export class ProfileService {
 
     return profile.update(dto);
   }
+
   async findByUserId(userId: number) {
     return this.profileModel.findOne({
       where: { userId },
       include: [{ model: User, attributes: ['email'] }],
     });
+  }
+
+  async hasPreference(userId: number): Promise<boolean> {
+    const user = await this.profileModel.findOne({
+      where: { userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('No se encontro el usuario');
+    }
+
+    const { age, height, objective, weight } = user.dataValues;
+
+    const validatePreference =
+      age != null && height != null && objective != null && weight != null;
+
+    return validatePreference;
   }
 }

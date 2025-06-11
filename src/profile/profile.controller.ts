@@ -1,5 +1,19 @@
-import { Body, Controller, Get, Param, Patch, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -10,14 +24,16 @@ import { AuthGuard } from '@nestjs/passport';
 @UseGuards(AuthGuard('jwt'))
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
-  
+
   @Get('user/:userId')
   @ApiParam({ name: 'userId', type: Number, description: 'ID del usuario' })
-  @ApiResponse({ status: 200, description: 'Perfil encontrado con datos del usuario asociado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil encontrado con datos del usuario asociado',
+  })
   async getByUserId(@Param('userId') userId: number) {
     return this.profileService.findByUserId(userId);
   }
-
 
   @Patch('user/:id')
   @ApiBody({ type: UpdateProfileDto })
@@ -28,7 +44,9 @@ export class ProfileController {
     return this.profileService.updateByUserId(Number(id), dto);
   }
 
- 
-
- 
+  @Get('/hasPreference/:userId')
+  @ApiParam({ name: 'userId', type: Number })
+  async userHasPreference(@Param('userId') userId: number): Promise<boolean> {
+    return this.profileService.hasPreference(userId);
+  }
 }
