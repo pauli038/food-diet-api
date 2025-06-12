@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -22,6 +23,14 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    const prevUser = await this.userModel.findOne({ where: { email: dto.email } });
+
+    console.log(prevUser)
+    if (prevUser) {
+      throw new ConflictException(
+        `El correo ya se encuentra en uso.`,
+      );
+    }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     const user = await this.userModel.create({
@@ -44,9 +53,6 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.userModel.findOne({ where: { email: dto.email } });
-
-    console.log('DTO Password:', dto.password);
-    console.log('User Password:', user?.password);
 
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('Credenciales inválidas');
