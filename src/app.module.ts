@@ -26,9 +26,7 @@ import { EmailHelperModule } from './email-helper/email-helper.module';
        database: process.env.DB_NAME,
        models: [User, Profile, Recipe],
        autoLoadModels: true,
-       synchronize: true,
-       logging: console.log,
-
+       synchronize: true
     }),
     UserModule,
     ProfileModule,

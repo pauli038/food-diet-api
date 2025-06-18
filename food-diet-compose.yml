@@ -7,11 +7,11 @@ services:
       args:
         DB_HOST: mysql
         DB_PORT: '3306'
-        DB_USERNAME: sql user
-        DB_PASSWORD: sql password
-        DB_NAME: db name
+        DB_USERNAME: root
+        DB_PASSWORD: hogar_de_libros_db
+        DB_NAME: food_diet
         DB_DIALECT: mysql
-        GEMINI_API_KEY: api key
+        GEMINI_API_KEY: AIzaSyDiAMWUrpO9Rx-JELUK3ViBCMNiOzcBZgU
     expose:
       - '3000'
     environment:
