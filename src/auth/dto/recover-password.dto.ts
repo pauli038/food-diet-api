@@ -1,8 +1,13 @@
-
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class RecoverPasswordDto {
+  @ApiProperty({ example: 'usuario@example.com' })
+  @IsEmail()
+  email: string;
+}
+
+export class resetPaswordDto {
   @ApiProperty({ example: 'usuario@example.com' })
   @IsEmail()
   email: string;
@@ -15,6 +20,5 @@ export class RecoverPasswordDto {
   @ApiProperty({ example: 'NuevaContraseña123' })
   @IsString()
   @MinLength(8)
-  confirmPassword: string;
+  temporalPassword: string;
 }
-

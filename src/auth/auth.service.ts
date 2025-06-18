@@ -10,9 +10,14 @@ import { User } from 'src/user/user.model';
 import { ProfileService } from 'src/profile/profile.service';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { RecoverPasswordDto } from './dto/recover-password.dto';
+import {
+  RecoverPasswordDto,
+  resetPaswordDto,
+} from './dto/recover-password.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { EmailHelperService } from 'src/email-helper/email-helper.service';
 
 @Injectable()
 export class AuthService {
@@ -20,16 +25,17 @@ export class AuthService {
     @InjectModel(User) private userModel: typeof User,
     private readonly profile: ProfileService,
     private readonly jwtService: JwtService,
+    private readonly emailHelperService: EmailHelperService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const prevUser = await this.userModel.findOne({ where: { email: dto.email } });
+    const prevUser = await this.userModel.findOne({
+      where: { email: dto.email },
+    });
 
-    console.log(prevUser)
+    console.log(prevUser);
     if (prevUser) {
-      throw new ConflictException(
-        `El correo ya se encuentra en uso.`,
-      );
+      throw new ConflictException(`El correo ya se encuentra en uso.`);
     }
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
@@ -67,16 +73,54 @@ export class AuthService {
   }
 
   async recoverPassword(dto: RecoverPasswordDto) {
-    const { email, newPassword, confirmPassword } = dto;
-
-    if (newPassword !== confirmPassword) {
-      throw new BadRequestException('Las contraseñas no coinciden');
-    }
+    const { email } = dto;
 
     const user = await this.userModel.findOne({ where: { email } });
 
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
+    }
+
+
+    const newTemporalPassword = crypto.randomBytes(4).toString('hex');
+    const hashedTempPassword = await bcrypt.hash(newTemporalPassword, 10);
+
+    user.temporalPassword = hashedTempPassword;
+    const expires= new Date(Date.now() + 15 * 60 * 1000);
+    user.temporalPasswordExpires = expires
+    await user.save();
+
+    await this.emailHelperService.sendTemporalPass(
+      user.email,
+      newTemporalPassword,
+    );
+
+    return { message: 'Intrucciones enviadas al correo.' };
+  }
+
+  async resetPassword(dto: resetPaswordDto) {
+    const { newPassword, temporalPassword, email } = dto;
+
+    const user = await this.userModel.findOne({ where: { email } });
+
+    if (!user || !user.temporalPassword) {
+      throw new NotFoundException(
+        'Usuario no encontrado o sin contraseña temporal',
+      );
+    }
+    if (
+      !user.temporalPasswordExpires ||
+      user.temporalPasswordExpires < new Date()
+    ) {
+      throw new BadRequestException('La contraseña temporal ha expirado');
+    }
+
+    const isTempMatch = await bcrypt.compare(
+      temporalPassword,
+      user.temporalPassword,
+    );
+    if (!isTempMatch) {
+      throw new BadRequestException('Código temporal incorrecto');
     }
 
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
@@ -86,12 +130,12 @@ export class AuthService {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.temporalPassword = null;
+    user.temporalPasswordExpires = null;
     await user.save();
 
-    return { message: 'Contraseña actualizada correctamente' };
+    return { message: 'Contraseña modificada con exito.' };
   }
 
   extractTokenFromRawHeaders(rawHeaders: string[]): string | null {

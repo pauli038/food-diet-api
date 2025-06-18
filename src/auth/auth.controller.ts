@@ -3,8 +3,7 @@ import { ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { RecoverPasswordDto } from './dto/recover-password.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { RecoverPasswordDto,  resetPaswordDto } from './dto/recover-password.dto';
 
 
 @ApiTags('Auth')
@@ -29,5 +28,10 @@ export class AuthController {
   @ApiBody({ type: RecoverPasswordDto })
   async recoverPassword(@Body() dto: RecoverPasswordDto) {
     return this.authService.recoverPassword(dto);
+  }
+
+  @Patch('resetPasword')
+  async resetPasword(@Body() dto: resetPaswordDto){
+    return await this.authService.resetPassword(dto)
   }
 }  

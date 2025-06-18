@@ -11,6 +11,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { RecipeForeignModule } from './foreign-recipe/recipe-foreign.module';
+import { EmailHelperModule } from './email-helper/email-helper.module';
 
 @Module({
   
@@ -34,6 +35,7 @@ import { RecipeForeignModule } from './foreign-recipe/recipe-foreign.module';
     RecipeModule,
     AuthModule,
     RecipeForeignModule,
+    EmailHelperModule,
   ],
   controllers: [AppController],
   providers: [AppService],

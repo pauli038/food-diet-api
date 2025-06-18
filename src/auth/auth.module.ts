@@ -8,6 +8,7 @@ import { User } from '../user/user.model';
 import { Profile } from '../profile/profile.model';
 import { AuthController } from './auth.controller';
 import { ProfileModule } from 'src/profile/profile.module';
+import { EmailHelperModule } from 'src/email-helper/email-helper.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ProfileModule } from 'src/profile/profile.module';
     }),
     SequelizeModule.forFeature([User, Profile]),
      ProfileModule, 
+     EmailHelperModule
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
