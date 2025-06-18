@@ -12,6 +12,9 @@ services:
         DB_NAME: food_diet
         DB_DIALECT: mysql
         GEMINI_API_KEY: AIzaSyDiAMWUrpO9Rx-JELUK3ViBCMNiOzcBZgU
+        MAIL_PASS: xyyx nsdu uafe gped
+        MAIL_USER: dian7875.a@gmail.com
+
     expose:
       - '3000'
     environment:
